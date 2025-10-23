@@ -86,6 +86,18 @@ export class ApiService {
   }
 
   static async searchTemplates(query: string): Promise<ApiResponse> {
+    const cacheKey = `search_${query.toLowerCase().trim()}`;
+    
+    // Try to get from cache first
+    const { CacheService } = await import('./cache');
+    const cachedData = await CacheService.get<ApiResponse>(cacheKey);
+    
+    if (cachedData) {
+      console.log('Loading search results from cache');
+      return cachedData;
+    }
+
+    // Fetch from API if not in cache
     const url = `${SEARCH_API_URL}?search=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       method: 'GET',
@@ -109,6 +121,12 @@ export class ApiService {
           has_more: false,
         },
       };
+    }
+    
+    // Cache only if we have valid data
+    if (data.data && data.data.video_templates && data.data.video_templates.length > 0) {
+      await CacheService.set(cacheKey, data);
+      console.log('Search results cached successfully');
     }
     
     return data;
