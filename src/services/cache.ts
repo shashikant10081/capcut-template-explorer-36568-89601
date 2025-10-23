@@ -1,4 +1,6 @@
-const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+import { Preferences } from '@capacitor/preferences';
+
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 interface CacheItem<T> {
   data: T;
@@ -10,27 +12,30 @@ export class CacheService {
     return Date.now() - timestamp > CACHE_DURATION;
   }
 
-  static set<T>(key: string, data: T): void {
+  static async set<T>(key: string, data: T): Promise<void> {
     const cacheItem: CacheItem<T> = {
       data,
       timestamp: Date.now(),
     };
     try {
-      localStorage.setItem(key, JSON.stringify(cacheItem));
+      await Preferences.set({
+        key,
+        value: JSON.stringify(cacheItem),
+      });
     } catch (error) {
       console.error('Error saving to cache:', error);
     }
   }
 
-  static get<T>(key: string): T | null {
+  static async get<T>(key: string): Promise<T | null> {
     try {
-      const item = localStorage.getItem(key);
-      if (!item) return null;
+      const { value } = await Preferences.get({ key });
+      if (!value) return null;
 
-      const cacheItem: CacheItem<T> = JSON.parse(item);
+      const cacheItem: CacheItem<T> = JSON.parse(value);
       
       if (this.isExpired(cacheItem.timestamp)) {
-        this.remove(key);
+        await this.remove(key);
         return null;
       }
 
@@ -41,17 +46,17 @@ export class CacheService {
     }
   }
 
-  static remove(key: string): void {
+  static async remove(key: string): Promise<void> {
     try {
-      localStorage.removeItem(key);
+      await Preferences.remove({ key });
     } catch (error) {
       console.error('Error removing from cache:', error);
     }
   }
 
-  static clear(): void {
+  static async clear(): Promise<void> {
     try {
-      localStorage.clear();
+      await Preferences.clear();
     } catch (error) {
       console.error('Error clearing cache:', error);
     }

@@ -50,6 +50,18 @@ export interface ApiResponse {
 
 export class ApiService {
   static async getCollectionTemplates(collectionId: number, count: number = 200): Promise<ApiResponse> {
+    const cacheKey = `collection_${collectionId}_${count}`;
+    
+    // Try to get from cache first
+    const { CacheService } = await import('./cache');
+    const cachedData = await CacheService.get<ApiResponse>(cacheKey);
+    
+    if (cachedData) {
+      console.log('Loading collection from cache');
+      return cachedData;
+    }
+
+    // Fetch from API if not in cache
     const url = `${COLLECTION_API_BASE_URL}${collectionId}&count=${count}`;
     const response = await fetch(url);
     
@@ -62,6 +74,12 @@ export class ApiService {
     // Normalize collection API response - it uses item_list instead of video_templates
     if (data.data?.item_list && !data.data.video_templates) {
       data.data.video_templates = data.data.item_list;
+    }
+    
+    // Cache only if we have valid data
+    if (data.data && data.data.video_templates && data.data.video_templates.length > 0) {
+      await CacheService.set(cacheKey, data);
+      console.log('Collection cached successfully');
     }
     
     return data;
