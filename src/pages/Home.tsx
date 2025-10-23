@@ -7,6 +7,7 @@ import { CategoryChip } from "@/components/CategoryChip";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { adMobService } from "@/services/admob";
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +27,14 @@ const Home = () => {
 
   useEffect(() => {
     loadTemplates(selectedCategory);
+    
+    // Show banner ad when home page loads
+    adMobService.showBanner().catch(console.error);
+    
+    // Clean up banner when component unmounts
+    return () => {
+      adMobService.hideBanner().catch(console.error);
+    };
   }, [selectedCategory]);
 
   const loadTemplates = async (categoryId: number) => {

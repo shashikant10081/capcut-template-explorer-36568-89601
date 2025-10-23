@@ -5,6 +5,7 @@ import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { adMobService } from "@/services/admob";
 
 const TemplateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,9 @@ const TemplateDetail = () => {
   useEffect(() => {
     if (id) {
       findTemplate(id);
+      
+      // Show interstitial ad when template detail page opens
+      adMobService.showInterstitial().catch(console.error);
     }
   }, [id]);
 
