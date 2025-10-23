@@ -101,7 +101,7 @@ const Search = () => {
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {templates.map((template) => (
-                <TemplateCard key={template.web_id} template={template} />
+                <TemplateCard key={template.web_id} template={template} searchQuery={query} />
               ))}
             </div>
           </>

@@ -6,13 +6,14 @@ import { useState, useRef } from "react";
 interface TemplateCardProps {
   template: VideoTemplate;
   currentCategory?: number;
+  searchQuery?: string;
 }
 
 const formatUsage = (amount: number) => {
   return amount >= 1000 ? `${(amount / 1000).toFixed(1)}K` : amount;
 };
 
-export const TemplateCard = ({ template, currentCategory }: TemplateCardProps) => {
+export const TemplateCard = ({ template, currentCategory, searchQuery }: TemplateCardProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -64,9 +65,13 @@ export const TemplateCard = ({ template, currentCategory }: TemplateCardProps) =
     setIsVideoPlaying(false);
   };
 
-  const templateLink = currentCategory 
-    ? `/template/${template.web_id}?from=/?category=${currentCategory}`
-    : `/template/${template.web_id}`;
+  // Construct the template link with the current context (category or search) as a 'from' parameter
+  let templateLink = `/template/${template.web_id}`;
+  if (searchQuery) {
+    templateLink += `?from=${encodeURIComponent(`/search?q=${searchQuery}`)}`;
+  } else if (currentCategory) {
+    templateLink += `?from=${encodeURIComponent(`/?category=${currentCategory}`)}`;
+  }
 
   return (
     <Link 
