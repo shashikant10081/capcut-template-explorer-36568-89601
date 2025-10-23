@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Users, FileText, ExternalLink, Smartphone } from "lucide-react";
 import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -9,8 +9,11 @@ import { Badge } from "@/components/ui/badge";
 const TemplateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [template, setTemplate] = useState<VideoTemplate | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const fromPath = searchParams.get('from') || '/';
 
   useEffect(() => {
     if (id) {
@@ -94,7 +97,7 @@ const TemplateDetail = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(fromPath)}
             className="text-white hover:bg-white/10"
           >
             <ArrowLeft className="w-6 h-6" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import { ApiService, categories, VideoTemplate } from "@/services/api";
 import { TemplateCard } from "@/components/TemplateCard";
@@ -9,11 +9,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const Home = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [templates, setTemplates] = useState<VideoTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState(6001);
+  const categoryFromUrl = parseInt(searchParams.get('category') || '6001');
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const categoryParam = parseInt(searchParams.get('category') || '6001');
+    if (categoryParam !== selectedCategory) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadTemplates(selectedCategory);
@@ -79,7 +88,10 @@ const Home = () => {
                 label={category.display_name}
                 emoji={category.emoji}
                 isActive={selectedCategory === category.id}
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id);
+                  setSearchParams({ category: category.id.toString() });
+                }}
               />
             ))}
           </div>
@@ -103,7 +115,11 @@ const Home = () => {
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {templates.map((template) => (
-                <TemplateCard key={template.web_id} template={template} />
+                <TemplateCard 
+                  key={template.web_id} 
+                  template={template} 
+                  currentCategory={selectedCategory}
+                />
               ))}
             </div>
           </>

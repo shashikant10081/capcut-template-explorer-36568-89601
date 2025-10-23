@@ -25,8 +25,17 @@ const BackButtonHandler = () => {
         // If we're on the home page, exit the app
         if (location.pathname === '/') {
           CapApp.exitApp();
+        } else if (location.pathname.startsWith('/template/')) {
+          // For template detail pages, check if there's a 'from' parameter
+          const searchParams = new URLSearchParams(location.search);
+          const fromPath = searchParams.get('from');
+          if (fromPath) {
+            navigate(fromPath);
+          } else {
+            navigate('/');
+          }
         } else {
-          // Otherwise, navigate back in history
+          // For other pages, navigate back in history
           navigate(-1);
         }
       });
@@ -39,7 +48,7 @@ const BackButtonHandler = () => {
         listenerHandle.remove();
       }
     };
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.search]);
 
   return null;
 };

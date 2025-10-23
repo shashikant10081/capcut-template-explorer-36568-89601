@@ -5,13 +5,14 @@ import { useState, useRef } from "react";
 
 interface TemplateCardProps {
   template: VideoTemplate;
+  currentCategory?: number;
 }
 
 const formatUsage = (amount: number) => {
   return amount >= 1000 ? `${(amount / 1000).toFixed(1)}K` : amount;
 };
 
-export const TemplateCard = ({ template }: TemplateCardProps) => {
+export const TemplateCard = ({ template, currentCategory }: TemplateCardProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,9 +64,13 @@ export const TemplateCard = ({ template }: TemplateCardProps) => {
     setIsVideoPlaying(false);
   };
 
+  const templateLink = currentCategory 
+    ? `/template/${template.web_id}?from=/?category=${currentCategory}`
+    : `/template/${template.web_id}`;
+
   return (
     <Link 
-      to={`/template/${template.web_id}`}
+      to={templateLink}
       state={{ template }}
       className="group block"
     >
